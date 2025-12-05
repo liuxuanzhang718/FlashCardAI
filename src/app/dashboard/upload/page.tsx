@@ -15,6 +15,8 @@ export default function UploadPage() {
     const [decks, setDecks] = useState<any[]>([])
     const [selectedDeckId, setSelectedDeckId] = useState<string>('new')
     const [newDeckName, setNewDeckName] = useState('')
+    const [cardCount, setCardCount] = useState(10)
+    const [cardStyle, setCardStyle] = useState('mixed')
     const router = useRouter()
 
     useEffect(() => {
@@ -52,6 +54,8 @@ export default function UploadPage() {
             // 1. Parse PDF and Generate Cards via API
             const formData = new FormData()
             formData.append('file', file)
+            formData.append('count', cardCount.toString())
+            formData.append('style', cardStyle)
 
             const res = await fetch('/api/generate', {
                 method: 'POST',
@@ -147,15 +151,46 @@ export default function UploadPage() {
                     </div>
 
                     {selectedDeckId === 'new' ? (
-                        <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">New Deck Name</label>
-                            <input
-                                type="text"
-                                value={newDeckName}
-                                onChange={(e) => setNewDeckName(e.target.value)}
-                                placeholder="e.g., Biology 101"
-                                className="w-full p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-500 mb-1">New Deck Name</label>
+                                <input
+                                    type="text"
+                                    value={newDeckName}
+                                    onChange={(e) => setNewDeckName(e.target.value)}
+                                    placeholder="e.g., Biology 101"
+                                    className="w-full p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-500 mb-1">Style</label>
+                                    <select
+                                        className="w-full p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                        value={cardStyle}
+                                        onChange={(e) => setCardStyle(e.target.value)}
+                                    >
+                                        <option value="mixed">Mixed Style</option>
+                                        <option value="qa">Q&A Only</option>
+                                        <option value="cloze">Cloze (Fill-in)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-500 mb-1">Card Count</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="50"
+                                        className="w-full p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value={cardCount || ''}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value)
+                                            setCardCount(isNaN(val) ? 0 : val)
+                                        }}
+                                        placeholder="Qty"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     ) : (
                         <div>

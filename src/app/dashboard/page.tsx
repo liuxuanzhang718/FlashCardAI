@@ -24,6 +24,7 @@ export default function Dashboard() {
     const [menuOpen, setMenuOpen] = useState<string | null>(null)
     const router = useRouter()
     const [allCards, setAllCards] = useState<any[]>([])
+    const [nickname, setNickname] = useState('')
 
     useEffect(() => {
         if (user) {
@@ -33,6 +34,19 @@ export default function Dashboard() {
 
     async function fetchData() {
         try {
+            // Fetch profile
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('nickname')
+                .eq('id', user!.id)
+                .single()
+
+            if (!profile?.nickname) {
+                router.push('/onboarding')
+                return
+            }
+            setNickname(profile.nickname)
+
             // Fetch decks
             const { data: decksData, error: decksError } = await supabase
                 .from('decks')
@@ -99,7 +113,10 @@ export default function Dashboard() {
                         <span className="font-medium">Back to Home</span>
                     </Link>
                     <div className="flex items-center justify-between">
-                        <h1 className="text-3xl font-bold">My Decks</h1>
+                        <div>
+                            <h1 className="text-3xl font-bold mb-1">Welcome, {nickname}!</h1>
+                            <p className="text-gray-500">Here are your flashcard decks.</p>
+                        </div>
                         <Link href="/dashboard/upload">
                             <Button>
                                 <Plus className="w-4 h-4 mr-2" /> New Deck
