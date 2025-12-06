@@ -95,6 +95,18 @@ export default function Onboarding() {
                         {loading ? 'Saving...' : 'Get Started'}
                     </Button>
                 </form>
+
+                <div className="mt-6 text-center">
+                    <button
+                        onClick={async () => {
+                            await supabase.auth.signOut()
+                            router.push('/login')
+                        }}
+                        className="text-sm text-gray-500 hover:text-gray-700 underline"
+                    >
+                        Sign Out / Switch Account
+                    </button>
+                </div>
             </div>
         </div>
     )

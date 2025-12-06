@@ -105,75 +105,98 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
-            <div className="max-w-5xl mx-auto">
-                <div className="mb-8">
-                    <Link href="/" className="inline-flex items-center text-gray-500 hover:text-black mb-6 transition-colors">
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        <span className="font-medium">Back to Home</span>
-                    </Link>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold mb-1">Welcome, {nickname}!</h1>
-                            <p className="text-gray-500">Here are your flashcard decks.</p>
-                        </div>
+        <div className="min-h-screen p-8">
+            <div className="max-w-6xl mx-auto">
+                {/* Header Section */}
+                <div className="mb-12 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-4xl font-bold mb-2 tracking-tight text-gray-900">Welcome, {nickname}!</h1>
+                        <p className="text-lg text-gray-500 font-medium">Ready to master something new today?</p>
+                    </div>
+                    <div className="flex gap-3">
                         <Link href="/dashboard/upload">
-                            <Button>
-                                <Plus className="w-4 h-4 mr-2" /> New Deck
+                            <Button className="h-12 px-6 rounded-full bg-black text-white hover:bg-gray-800 shadow-lg hover:shadow-xl transition-all text-base font-medium">
+                                <Plus className="w-5 h-5 mr-2" /> New Deck
                             </Button>
                         </Link>
+                        <Button
+                            variant="outline"
+                            className="h-12 px-6 rounded-full border-gray-200 hover:bg-gray-50 text-gray-600"
+                            onClick={async () => {
+                                await supabase.auth.signOut()
+                                router.push('/login')
+                            }}
+                        >
+                            Sign Out
+                        </Button>
                     </div>
                 </div>
 
                 {loading ? (
-                    <div>Loading...</div>
+                    <div className="flex items-center justify-center py-20">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                    </div>
                 ) : (
                     <>
-                        <DashboardAnalytics cards={allCards} />
+                        {/* Analytics Section */}
+                        <div className="mb-12">
+                            <DashboardAnalytics cards={allCards} />
+                        </div>
 
-                        {decks.length === 0 ? (
-                            <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
-                                <p className="text-gray-500 mb-4">No decks yet.</p>
-                                <Link href="/dashboard/upload">
-                                    <Button variant="outline">Create your first deck</Button>
-                                </Link>
-                            </div>
-                        ) : (
-                            <div className="grid md:grid-cols-3 gap-6">
-                                {decks.map((deck) => (
-                                    <div key={deck.id} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col justify-between relative overflow-hidden group">
-                                        <div>
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="p-2 bg-blue-50 rounded-lg text-blue-600 group-hover:bg-blue-100 transition-colors">
+                        {/* Decks Grid */}
+                        <div>
+                            <h2 className="text-2xl font-bold mb-6 tracking-tight text-gray-900">Your Decks</h2>
+
+                            {decks.length === 0 ? (
+                                <div className="text-center py-24 glass rounded-3xl border-0">
+                                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
+                                        <Book className="w-10 h-10" />
+                                    </div>
+                                    <h3 className="text-xl font-semibold mb-2 text-gray-900">No decks yet</h3>
+                                    <p className="text-gray-500 mb-8 max-w-md mx-auto">Create your first deck from a PDF to start learning efficiently.</p>
+                                    <Link href="/dashboard/upload">
+                                        <Button variant="outline" className="h-11 px-8 rounded-full border-gray-300 hover:bg-gray-50">Create Deck</Button>
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {decks.map((deck) => (
+                                        <div
+                                            key={deck.id}
+                                            onClick={() => router.push(`/study/${deck.id}`)}
+                                            className="group relative bg-white rounded-3xl p-6 shadow-apple hover:shadow-apple-hover transition-all duration-300 cursor-pointer border border-white/50 hover:-translate-y-1"
+                                        >
+                                            <div className="flex items-start justify-between mb-6">
+                                                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform duration-300">
                                                     <Book className="w-6 h-6" />
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     {deck.due_count! > 0 && (
-                                                        <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-full flex items-center">
+                                                        <span className="bg-red-50 text-red-600 text-xs font-bold px-3 py-1 rounded-full flex items-center border border-red-100">
                                                             <Clock className="w-3 h-3 mr-1" />
-                                                            {deck.due_count} Due
+                                                            {deck.due_count}
                                                         </span>
                                                     )}
-                                                    <div className="relative">
+                                                    <div className="relative" onClick={(e) => e.stopPropagation()}>
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation()
                                                                 setMenuOpen(menuOpen === deck.id ? null : deck.id)
                                                             }}
-                                                            className="p-1 hover:bg-gray-100 rounded transition-colors"
+                                                            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
                                                         >
-                                                            <MoreVertical className="w-5 h-5 text-gray-500" />
+                                                            <MoreVertical className="w-5 h-5" />
                                                         </button>
                                                         {menuOpen === deck.id && (
                                                             <>
                                                                 <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(null)} />
-                                                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-20">
+                                                                <div className="absolute right-0 mt-2 w-48 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 overflow-hidden z-20 ring-1 ring-black/5">
                                                                     <button
                                                                         onClick={(e) => {
                                                                             e.stopPropagation()
                                                                             router.push(`/deck/${deck.id}`)
                                                                         }}
-                                                                        className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center text-sm"
+                                                                        className="w-full px-4 py-3 text-left hover:bg-gray-50/50 flex items-center text-sm font-medium text-gray-700"
                                                                     >
                                                                         <Edit className="w-4 h-4 mr-3 text-gray-500" />
                                                                         Edit Deck
@@ -184,7 +207,7 @@ export default function Dashboard() {
                                                                             setMenuOpen(null)
                                                                             handleDeleteDeck(deck.id)
                                                                         }}
-                                                                        className="w-full px-4 py-3 text-left hover:bg-red-50 flex items-center text-sm text-red-600"
+                                                                        className="w-full px-4 py-3 text-left hover:bg-red-50/50 flex items-center text-sm font-medium text-red-600"
                                                                     >
                                                                         <Trash2 className="w-4 h-4 mr-3" />
                                                                         Delete Deck
@@ -195,25 +218,25 @@ export default function Dashboard() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div onClick={() => router.push(`/study/${deck.id}`)}>
-                                                <h3 className="text-xl font-semibold mb-2">{deck.name}</h3>
-                                                <p className="text-sm text-gray-500">
-                                                    Created {new Date(deck.created_at).toLocaleDateString()}
+
+                                            <div>
+                                                <h3 className="text-xl font-bold mb-2 text-gray-900 group-hover:text-blue-600 transition-colors">{deck.name}</h3>
+                                                <p className="text-sm text-gray-500 font-medium">
+                                                    Created {new Date(deck.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                 </p>
                                             </div>
-                                        </div>
-                                        {deck.due_count! > 0 && (
-                                            <div
-                                                onClick={() => router.push(`/study/${deck.id}`)}
-                                                className="mt-4 w-full bg-blue-600 text-white text-center py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                Study Now
+
+                                            <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between text-sm font-medium text-gray-500">
+                                                <span>Flashcards</span>
+                                                <span className="flex items-center text-blue-600 opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
+                                                    Study Now <ArrowLeft className="w-4 h-4 ml-1 rotate-180" />
+                                                </span>
                                             </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </>
                 )}
             </div>

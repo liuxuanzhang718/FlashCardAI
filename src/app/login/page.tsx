@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { OtpInput } from '@/components/ui/otp-input'
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -83,28 +84,27 @@ export default function Login() {
                     </div>
 
                     {showOTP ? (
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Verification Code</label>
-                            <input
-                                type="text"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="123456"
-                                required
-                            />
+                        <div className="space-y-6">
+                            <div className="text-center">
+                                <label className="block text-sm font-medium text-gray-700 mb-4">Enter Verification Code</label>
+                                <OtpInput
+                                    value={otp}
+                                    onChange={setOtp}
+                                    disabled={loading}
+                                />
+                            </div>
                             <Button
                                 type="button"
                                 onClick={handleVerifyOtp}
-                                className="w-full mt-4"
-                                disabled={loading}
+                                className="w-full h-11"
+                                disabled={loading || otp.length !== 6}
                             >
                                 {loading ? 'Verifying...' : 'Verify & Login'}
                             </Button>
                             <button
                                 type="button"
                                 onClick={() => setShowOTP(false)}
-                                className="w-full mt-2 text-sm text-gray-500 hover:text-gray-700"
+                                className="w-full text-sm text-gray-500 hover:text-gray-700"
                             >
                                 Back to Email
                             </button>
